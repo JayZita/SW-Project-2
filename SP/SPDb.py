@@ -1,5 +1,5 @@
 from SPDbEntry import SPDbEntry
-import csv
+import json
 
 class SPDb:
 
@@ -9,6 +9,8 @@ class SPDb:
         # initialize container of database entries
         self.entries = []
         print('TODO: __init__')
+
+        self.characterList = []
 
 
     def fetch_characters(self):
@@ -59,8 +61,14 @@ class SPDb:
             raise ValueError(f"ID {id} does not exist in the database")
         print('Entry updated successfully')
      
+    def import_csv(self, csv_filename):
+        with open(csv_filename, 'r') as file:
+            for line in file:
+                data = line.strip().split(',')
+                new_entry = SPDbEntry(*data)
+                self.entries.append(new_entry)
+        return True  
               
-
     def export_csv(self):
 
         with open(self.dbName, 'w') as file:
@@ -68,25 +76,20 @@ class SPDb:
                 file.write(f"{entry.id},{entry.name},{entry.job},{entry.level},{entry.status}\n")
         print('TODO: export_csv')
 
-    def import_csv(self, csv_filename):
-        try:
-            if not csv_filename.lower().endswith('.csv'):
-                csv_filename += '.csv'
+    def export_json(self, json_filename='CharactersDb.json'):
+        data = [{'id': entry.id,
+                 'name': entry.name,
+                 'birthdate': entry.job,
+                 'sex': entry.level,
+                 'bloodtype': entry.status,} 
+                 for entry in self.entries]
 
-            with open(csv_filename, 'r') as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    id, name, job, level, status = row
-                    # Add logic to handle the data, e.g., insert into your database
-                    self.insert_character(id, name, job, level, status)
-            print('Data imported successfully')
-            return True
-        except FileNotFoundError:
-            print(f'Error importing data: File not found - {csv_filename}')
-            return False
-        except Exception as e:
-            print(f'Error importing data: {e}')
-            return False
+        with open(json_filename, 'w') as json_file:
+            json.dump(data, json_file, indent=2)
+
+        with open(json_filename, 'w') as json_file:
+            json.dump(data, json_file, indent=2)
+
 
     def id_exists(self, id):
         """

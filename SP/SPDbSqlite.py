@@ -3,6 +3,8 @@ This is the interface to an SQLite Database
 '''
 
 import sqlite3
+import csv
+import json
 
 class SPDbSqlite:
     def __init__(self, dbName='Characters.db'):
@@ -78,6 +80,35 @@ class SPDbSqlite:
             for entry in dbEntries:
                 print(entry)
                 filehandle.write(f"{entry[0]},{entry[1]},{entry[2]},{entry[3]},{entry[4]}\n")
+
+    def import_csv(self, file_path):
+        try:
+            with open(file_path, newline='') as csv_file:
+                csv_reader = csv.reader(csv_file)
+                next(csv_reader)  # Skip the header row
+                for row in csv_reader:
+                    self.insert_character(*row)
+            return True
+        except Exception as e:
+            print(e)
+            return False
+        
+    def export_json(self):
+        characters = self.fetch_characters()
+        json_data = []
+
+        for character in characters:
+            character_dict = {
+                'ID': character[0],
+                'Name': character[1],
+                'Job': character[2],
+                'Level': character[3],
+                'Status': character[4],
+            }
+            json_data.append(character_dict)
+
+        with open('character_data.json', 'w') as json_file:
+            json.dump(json_data, json_file, indent=4)
 
 def test_SPDb():
     iSPDb = SPDbSqlite(dbName='SPDbSql.db')

@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import ttk
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import filedialog
 from SPDbSqlite import SPDbSqlite
 from PIL import Image, ImageTk
 
@@ -75,11 +76,17 @@ class SPGuiCtk(customtkinter.CTk):
         self.add_button.place(x=50,y=350)
 
         self.new_button = self.newCtkButton(text='New Character',
-                                onClickHandler=lambda:self.clear_form(True))
+                                onClickHandler=lambda:self.clear_form(True),
+                                fgColor='#006400',
+                                hoverColor='#FFDB58',
+                                borderColor='#FFDB58')
         self.new_button.place(x=50,y=400)
 
         self.update_button = self.newCtkButton(text='Update Character',
-                                    onClickHandler=self.update_entry)
+                                    onClickHandler=self.update_entry,
+                                    fgColor='#006400',
+                                    hoverColor='#FFDB58',
+                                    borderColor='#FFDB58')
         self.update_button.place(x=50,y=450)
 
         self.delete_button = self.newCtkButton(text='Delete Character',
@@ -90,12 +97,24 @@ class SPGuiCtk(customtkinter.CTk):
         self.delete_button.place(x=50,y=500)
 
         self.export_button = self.newCtkButton(text='Export to CSV',
-                                    onClickHandler=self.export_to_csv)
+                                    onClickHandler=self.export_to_csv,
+                                    fgColor='#006400',
+                                    hoverColor='#FFDB58',
+                                    borderColor='#FFDB58')
         self.export_button.place(x=50,y=550)
 
         self.import_button = self.newCtkButton(text='Import from CSV', 
-                                    onClickHandler=self.import_to_csv,)
-        self.import_button.place(x=50, y=600) 
+                                    onClickHandler=self.import_to_csv,
+                                    fgColor='#006400',
+                                    hoverColor='#FFDB58',
+                                    borderColor='#FFDB58')
+        self.import_button.place(x=50, y=600)
+        self.exportj_button = self.newCtkButton(text='Export to JSON', 
+                                    onClickHandler=self.export_to_json,
+                                    fgColor='#006400',
+                                    hoverColor='#FFDB58',
+                                    borderColor='#FFDB58')
+        self.exportj_button.place(x=50, y=650) 
 
         # Tree View for Database Entries
         self.style = ttk.Style(self)
@@ -296,10 +315,21 @@ class SPGuiCtk(customtkinter.CTk):
         messagebox.showinfo('Success', f'Data exported to {self.db.dbName}.csv')
 
     def import_to_csv(self):
-        csv_filename = 'SPDb.csv'
-        self.db.import_csv(csv_filename)
-        self.add_to_treeview()
-        messagebox.showinfo('Success', f'Data imported from {self.db.dbName}')
+        file_path = filedialog.askopenfilename(title="Open CSV File", filetypes=[("CSV files", ".csv")])
+        if not file_path:
+            messagebox.showinfo('Info', 'No file selected.')
+            return
+
+        if self.db.import_csv(file_path):
+            messagebox.showinfo('Success', f'Data imported from {file_path}')
+            # Optionally, update the displayed data in your GUI after importing
+            self.add_to_treeview()
+        else:
+            messagebox.showerror('Error', f'Failed to import data from {file_path}')
+
+    def export_to_json(self):
+        self.db.export_json()
+        messagebox.showinfo('Success', 'Entries exported to CharactersDb.json')
 
     
 
